@@ -1,0 +1,73 @@
+PROCEDURE jour_comp_pet  (comp number,pay_day date,us number)  IS
+BEGIN
+   DECLARE X NUMBER;Y CHAR(70); x1 number;x2 number;c varchar2(300);co number;
+  BEGIN
+   select count(*) into co from  mp.PAY_PAYROLLS where TO_CHAR(PAY_Date,'MM/yyyy')=TO_CHAR(PAY_Day,'MM/yyyy') and COMP_NO=COMP;
+  if co>0 then
+  	--msg_alert('Journal Complete',false);
+  begin
+
+
+select 'Salary of'||'-'||division_name  into c from mp.lkp_divisions where division_no=comp;
+exception when no_data_found then c:='';
+end;
+  SELECT NVL(MAX(to_number(voucher_NO)),0)+1 INTO X  FROM daily_trans;
+
+
+  Y :=TO_CHAR(PAY_Day,'Month-yyyy');
+
+begin
+insert into daily_trans(VOUCHER_NO    ,        TRANS_DATE     ,  TRANS_TYPE,description        )  values (x,pay_day,5,c);
+
+commit;
+
+insert into DAILY_TRANS_DETAILS (    ACC_NO,  TRANS_SERIAL     ,  trans_date,VOUCHER_NO        ,   DEBIT_CREDIT     ,  CREDIT_AMNT     ,   DEBIT_AMNT       ,
+  DET_DESCRIPTION               ,   CURRENCY         ,   RATE ,USER_ID,ENTRY_DATE         )
+select  NVL(a.acc_no,0) , B.PAY_PAYROLL_TYPES_ID,PAY_Day,X,'d',0,sum(b.AMT),
+c.name||y,'SDG',1,US,SYSDATE
+from mp.PAYrOLL_item_acc a,mp.PAY_PAYROLLS_LINES b,mp.PAY_PAYROLL_ITEMS_TYPES C  where
+PAY_ID in(select ID from mp.PAY_PAYROLLS where TO_CHAR(PAY_Date,'MM/yyyy')=TO_CHAR(PAY_Day,'MM/yyyy') and COMP_NO=COMP)
+AND a.COMP_NO=COMP
+AND A.PAY_ITEM_NO=B.PAY_PAYROLL_TYPES_ID AND B.PAY_PAYROLL_TYPES_ID=C.CODE and c. ALLOWANCE_DEDUCTION_FLAG ='A' HAVING
+  NVL(sum(b.AMT),0)>0   /*AND NVL(a.acc_no,0)>0 */group by
+  NVL(a.acc_no,0) , B.PAY_PAYROLL_TYPES_ID,pay_day,X,'d',0,
+c.name||y,'SDG',1,US,SYSDATE;
+commit;
+exception when no_data_found then null;
+when too_many_rows then null;
+end;
+begin
+insert into DAILY_TRANS_DETAILS (    ACC_NO,  TRANS_SERIAL     , trans_date, VOUCHER_NO        ,   DEBIT_CREDIT     ,  CREDIT_AMNT     ,   DEBIT_AMNT       ,
+  DET_DESCRIPTION               ,   CURRENCY         ,   RATE   ,USER_ID,ENTRY_DATE       )
+select  NVL(a.acc_no,0) , B.PAY_PAYROLL_TYPES_ID,pay_day,X,'c',sum(b.AMT),0,
+c.name||y,'SDG',1,US,SYSDATE
+from mp.PAYrOLL_item_acc a,mp.PAY_PAYROLLS_LINES b,mp.PAY_PAYROLL_ITEMS_TYPES C  where
+PAY_ID in(select ID from mp.PAY_PAYROLLS where TO_CHAR(PAY_Date,'MM/yyyy') =TO_CHAR(PAY_Day,'MM/yyyy')and COMP_NO=COMP)
+AND a.COMP_NO=COMP
+AND A.PAY_ITEM_NO=B.PAY_PAYROLL_TYPES_ID AND B.PAY_PAYROLL_TYPES_ID=C.CODE and c. ALLOWANCE_DEDUCTION_FLAG !='A' HAVING
+  NVL(sum(b.AMT),0)>0  /*AND  NVL(a.acc_no,0)>0 */group by
+ NVL(a.acc_no,0) , B.PAY_PAYROLL_TYPES_ID,pay_day,X,'c',0,
+c.name||y,'SDG',1,US,SYSDATE;
+COMMIT;
+exception when no_data_found then null;
+when too_many_rows then null;
+end;
+begin
+insert into DAILY_TRANS_DETAILS (    ACC_NO,  TRANS_SERIAL     ,  trans_date,VOUCHER_NO        ,   DEBIT_CREDIT     ,  CREDIT_AMNT     ,   DEBIT_AMNT       ,
+  DET_DESCRIPTION               ,   CURRENCY         ,   RATE ,USER_ID,ENTRY_DATE         )
+select  NVL(a.acc_no,0) , B.PAY_PAYROLL_TYPES_ID,pay_day,X,'c',sum(b.AMT),0,
+c.name||y,'SDG',1,US,SYSDATE
+from mp.EMPLOYEES  a,mp.PAY_PAYROLLS_LINES  b,mp.PAY_PAYROLL_ITEMS_TYPES  C  where
+PAY_ID in(select ID from mp.PAY_PAYROLLS where TO_CHAR(PAY_Date,'MM/yyyy')=TO_CHAR(PAY_Day,'MM/yyyy' )and COMP_NO=COMP)
+  AND a.division_NO=comp
+AND A.EMPLOYEE_NO=B.EMP_ID AND B.PAY_PAYROLL_TYPES_ID=C.CODE AND   C.code =12 HAVING
+  NVL(sum(b.AMT),0)>0 group by
+ NVL(a.acc_no,0) , B.PAY_PAYROLL_TYPES_ID,pay_day,X,'c',0,
+c.name||y,'SDG',1,US,SYSDATE;
+commit;
+exception when no_data_found then null;
+when too_many_rows then null;
+end;
+end if;
+end;
+END;
