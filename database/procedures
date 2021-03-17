@@ -181,5 +181,67 @@ END IF;
 end;
 
 END;
+....
+function budg(bitem number,proj  number,pr_day  date, cost_cen CHAR,ty number)return number   IS
+  x boolean ;m number;mamt number;m_n number;q number;budg_rem number;budg number;b1 number;b2 number; b3 number;b4 number; b_tot number;
+  b number; e number;y number;
+begin
+
+  declare e number;b number;
+  begin
+
+   --select max(mon_no) into m_n from budget_items where  bitem_no=bitem_no;
+    q:=TO_NUMBER(TO_CHAR(pr_day,'Q'));
+	select round(nvl(max(q1),0),2) ,round(nvl(max(q2),0),2),round(nvl(max(q3),0),2),round(nvl(max(q4),0),2) into b1,b2,b3,b4
+	 from budget where proj_no=proj and bitem_no=bitem  and byear=to_char(pr_day,'yyyy');
+	if q=1 then
+    select round(nvl(max(q1),0),2) into b from budget where proj_no=proj and bitem_no=bitem  and byear=to_char(pr_day,'yyyy');
+	b_tot:=0;
+elsif q=2 then
+ select round(nvl(max(q2),0),2) into b from budget where proj_no=proj and bitem_no=bitem  and byear=to_char(pr_day,'yyyy');
+ b_tot:=b1;
+ elsif q=3 then
+ select round(nvl(max(q3),0),2) into b from budget where proj_no=proj and bitem_no=bitem  and byear=to_char(pr_day,'yyyy');
+ b_tot:=b1+b2;
+ elsif q=4 then
+ select round(nvl(max(q4),0),2) into b from budget where proj_no=proj and bitem_no=bitem  and byear=to_char(pr_day,'yyyy');
+ b_tot:=b1+b2+b3;
+ end if;
+    if b+b_tot =0 and  bitem not in (98,94) then
+     budg:=2;
+    elsif  bitem in(98,94) then
+     budg:=1;
+     else
+  select nvl(sum(debit-credit),0) into e from budget_acc
+      where   acc_no=cost_cen
+  AND to_char(day_date,'yyyy')=to_char(pr_day,'yyyy')and  to_char(day_date,'Q')<to_char(pr_day,'Q');
+  select nvl(sum(debit-credit),0) into mamt from budget_acc
+      where   acc_no=cost_cen AND to_char(day_date,'yyyy')=to_char(pr_day,'yyyy')
+ and  to_char(day_date,'Q')=to_char(pr_day,'Q');
+
+      budg_rem:=(b+(b_tot-e))-mamt;
+		select count(*) into y from budget_excep where  bitem_no=bitem;
+	if y>0  then
+  --if  bitem  in (94,98) then
+   budg:=1;
+   else
+  if budg_rem<=0 then
+
+   budg:=0;
+   else
+budg:=1;
+  end if;
+   end if;
+     end if;/*b=0*/
+
+  end;
+
+ if ty=1 then
+ return(budg_rem);
+ else
+ return (budg);
+end if;
+ end;
+
 
 
