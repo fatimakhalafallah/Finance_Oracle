@@ -42,3 +42,14 @@ and   (voucher_flag is null or voucher_flag=0)
 group by invoice,inv_date, curr_name,amount,descrep,acc_no
 
 ---------------------------
+
+CREATE OR REPLACE VIEW P_VOUCH ( VOUCHER_NO, 
+TRANS_DATE, DEBIT, CREDIT, DOC_NO, 
+DESCR, USER_ID, TRANS_SERIAL ) AS SELECT  A.VOUCHER_NO,A.TRANS_DATE,sum(NVL(B.debit_amnt,0)),sum(NVL(B.credit_amnt,0)),nvl(A.doc_CHEQUE_no,B.document_no),nvl(A.descrIPTION,B.det_description),B.USER_ID,MIN(TRANS_SERIAL)
+FROM    DAILY_TRANS A ,DAILY_TRANS_DETAILS  B
+WHERE  A.TRANS_DATE=B.TRANS_DATE
+AND A.VOUCHER_NO=B.VOUCHER_NO 
+AND A.APPROVAL_FLAG='U'  AND COMPLETE_FLAG=1
+GROUP BY  A.VOUCHER_NO,A.TRANS_DATE, B.USER_ID         ,nvl(A.doc_CHEQUE_no,B.document_no),nvl(A.descrIPTION,B.det_description)
+
+-------------------- 
