@@ -119,6 +119,18 @@ NVL(daily_trans_details.rate,1),daily_trans_details.currency,acc_no,debit_credit
 AND   complete_flag=1 and APPROVAL_FLAG='Y'
  and    closing_flag is null  
  ORDER BY acc_no,TRANS_DATE
+------------------------------------------------------------------------------------------------------
+
+CREATE OR REPLACE VIEW ALL_ACCOUNTS ( ACC_NO, 
+HIGH_ACC_NO, PARENT_ACC_NO, ACC_NAME_ARA, ACC_LEVEL, 
+TYPE, ACC_CLASS, COST_CENTER ) AS select  low_acc_no acc_no,high_acc_no,parent_acc_no,acc_name_ara,acc_level ,'1' type,ACC_CLASS,0  cost_center from main_accounts    a
+union  select  acc_no acc_no,'',main_acc_no,
+b.acc_name_ara,
+b.acc_level ,'2' type , a.acc_class,cost_center cost_center
+ from details_accounts b,main_accounts a
+ where   b.main_acc_no=a.low_acc_no
+ order by acc_level,acc_no
+
 
 
 
