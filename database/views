@@ -53,3 +53,54 @@ AND A.APPROVAL_FLAG='U'  AND COMPLETE_FLAG=1
 GROUP BY  A.VOUCHER_NO,A.TRANS_DATE, B.USER_ID         ,nvl(A.doc_CHEQUE_no,B.document_no),nvl(A.descrIPTION,B.det_description)
 
 -------------------- 
+
+
+CREATE OR REPLACE VIEW FINAL_ACCOUNTS_VIEW_N ( GROUP_NO, 
+SERIAL, TYPE1, ACC_NO, HIGH_ACC_NO, 
+ACC_NAME_ARA, ACC_CLASS, STATEMENT1, AMOUNT, 
+TOTAL_AMOUNT ) AS select  1,1,'label',null,null,'ÇáÅíÑÇÏÇÊ',  null ,1, null ,null  from dual
+union select  1,2,'field ',low_acc_no,high_acc_no,acc_name_ara,acc_class ,1, 1 ,0 from main_accounts where acc_class=4 and acc_level=1 and acc_status=1 and cost_center_m in (1,2,3,4,5)
+union select  1,2,'field ',low_acc_no,high_acc_no,acc_name_ara,acc_class ,1, 1 ,0 from main_accounts where acc_class=4 and acc_level=1 and acc_status=1 and cost_center_m in (6)
+union select  1,3,'tot',null,null,'ÅÌãÇáí ÇáÅíÑÇÏÇÊ',null,1,0,1   from  dual
+union select  2,1,'label',null,null,'ÇáãÕÑæÝÇÊ ÇáãÈÇÔÑÉ',null,1,null,null from dual
+union   select  3,3,'field',low_acc_no,high_acc_no,acc_name_ara ,acc_class ,1, 1,0  from main_accounts where acc_class=5 and acc_level=1 and acc_status=1
+union select  4,1,'label',null,null,'ÇáãÕÑæÝÇÊ ÇáÚãæãíÉ æÇáÅÏÇÑíÉ',null,1,null,null from dual
+union  select  5,1,'field', low_acc_no,high_acc_no,acc_name_ara,acc_class , 1,1,0  from main_accounts where acc_class=6 and acc_level=1 and acc_status=1
+and low_acc_no not like '62%'
+union  select  5,3,'field', low_acc_no,high_acc_no,acc_name_ara,acc_class , 1,1,0  from main_accounts where acc_class=6 and acc_level=1 and acc_status=1
+and low_acc_no  like '62%'
+union select  5,2,'tot',null,null,'ÅÌãÇáí ÇáãÕÑæÝÇÊ ÇáÚãæãíÉ æÇáÅåáÇß',null,1,0,-1 from dual
+union select  5,3,'tot',null,null,'ÅÌãÇáí ÇáãäÕÑÝÇÊ',null,1,null,null from dual
+union select  6,1,'tot-net-net', null,null,'ÅÌãÇáí ÇáÇÑÈÇÍ ÞÈá ÇáãÎÕÕÇÊ',null,1,0,1  from dual
+union  select  6,2,'label',null,null,'äÇÞÕÇ',null,1,null,null   from   dual
+union select  6,3,'field_net',null,null,'ÇáÇÑÈÇÍ ÞÈá ÇáÒßÇÉ æÇáÖÑÇÆÈ',null,1,0,1  from dual
+union  select  6,2,'label',null,null,'äÇÞÕÇ',null,1,null,null   from   dual
+union select  6,3,'field_net',acc_no,acc_no,acc_name_ara,null,1,0,-1 from details_accounts  where acc_no='57001005'
+union select  7,1,'lastnet',null,null,'ÕÇÝí ÇáÇÑÈÇÍ',null,1,0,1  from dual 
+union  select  8,1,'label',null,null,'ÇáÃÕæá',  null ,2, null ,null  from dual
+union se001005'
+union select  7,1,'lastnet',null,null,'ÕÇÝí ÇáÇÑÈÇÍ',null,1,0,1  from dual 
+union  select  8,1,'label',null,null,'ÇáÃÕæá',  null ,2, null ,null  from dual
+union select  8,2,'field ',low_acc_no,high_acc_no,acc_name_ara,acc_class ,2, 1 ,0 from main_accounts where acc_class=1 and acc_level=1 and acc_status=1
+union  select  8,3,'label',NULL,NULL,'äÇÞÕÇ',null,2,null,null from dual
+union  select  8,4,'field', low_acc_no,high_acc_no,acc_name_ara,acc_class ,2, -1,0  from main_accounts where acc_class=6 and acc_level=1 and acc_status=1
+and  acc_name_ara  not  like '%ãÔÊÑíÇÊ%'  and  acc_name_ara like '%ÅåáÇßÇÊ ÇáÃÕæá%'  or   acc_name_ara  like '%ÇåáÇßÇÊ ÇáÇÕæá%' 
+union  select  8,5,'net',null,null,'ÕÇÝí ÇáÃÕæá ÇáËÇÈÊÉ',  null ,2, null ,1  from dual 
+union  select  9,1,'label',null,null,'ÇáÃÕæá ÇáãÊÏÇæáÉ',null,2,null,null from dual
+union select  9,2,'field ',low_acc_no,high_acc_no,acc_name_ara,acc_class ,2, 1 ,0 from main_accounts where acc_class=2 and acc_level=1 and acc_status=1 
+and  acc_name_ara  not like '%ÓáÝ%'
+union select  9,2,'field ',null,null,'ÓáÝíÇÊ',null ,2, 1 ,0 from dual
+union  select  9,3,'tot1',null,null,'ÅÌãÇáí ÇáÃÕæá ÇáãÊÏÇæáÉ',  null ,2, null ,1  from dual
+union  select  10,1,'label',null,null,'äÇÞÕÇ',null,2,null,null from dual
+union  select  11,1,'label',null,null,'ÇáÎÕæã ÇáãÊÏÇæáÉ',null,2,null,null from dual
+union select  11,2,'field ',low_acc_no,high_acc_no,acc_name_ara,acc_class ,2, 1 ,0 from main_accounts where acc_class=3 and acc_level=1 and acc_status=1
+union  select  11,3,'tot2',null,null,'ÅÌãÇáí ÇáÎÕæã ÇáãÊÏÇæáÉ',null ,2, null,-1  from dual 
+union  select  12,1,'tot-tot',null,null,'ÑÇÓ ÇáãÇá ÇáÚÇãá',  null ,2, null,1 from dual 
+union  select  13,1,'lastnet',null,null,'ÅÌãÇáí ÇáÃÕæá',  null ,2, null ,1  from dual
+union  select  13,2,'label',null,null,'ããËáÇ Ýí',null,2,null,null from dual
+union select  13,3,'field ',low_acc_no,high_acc_no,acc_name_ara,acc_class ,2,-1 ,0 from main_accounts where acc_class=7 and acc_level=1 and acc_status=1 
+union select  13,4,'net',null,null,'ãÎÕÕ ÇáÒßÇÉ æÇáÖÑÇÆÈ',null,2,(-1*(total_amount)),0 from final_accounts where group_no=6 and serial=3                                                       
+union select  13,5,'pl',null,null,'ÕÇÝí ÇÑÈÇÍ ÇáÚÇã',null,2,(-1*(total_amount)) ,0  from final_accounts where group_no=7 and serial=1
+union select  13,6,'lastnet',null,null,'ÅÌãÇáí ÍÞæÞ ÇáãÇáßíä',null,2,0 ,1  from dual
+
+
