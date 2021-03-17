@@ -103,4 +103,22 @@ union select  13,4,'net',null,null,'ãÎÕÕ ÇáÒßÇÉ æÇáÖÑÇÆÈ',null
 union select  13,5,'pl',null,null,'ÕÇÝí ÇÑÈÇÍ ÇáÚÇã',null,2,(-1*(total_amount)) ,0  from final_accounts where group_no=7 and serial=1
 union select  13,6,'lastnet',null,null,'ÅÌãÇáí ÍÞæÞ ÇáãÇáßíä',null,2,0 ,1  from dual
 
+---------------------------------------------------------------------------------
+
+
+CREATE OR REPLACE VIEW VOUCHERS_VIEW1 ( VOUCHER_NO, 
+TRANS_SERIAL, DESCR, DOC_NO, TRANS_DATE, 
+DEBIT_AMNT, CREDIT_AMNT, RATE, CURRENCY, 
+ACC_NO, DEBIT_CREDIT, TRANS_TYPE, USER_ID, 
+RECEIPTS_VOUCH_SER, MODULE ) AS select  distinct daily_trans.voucher_no,trans_serial,NVL(det_description,DESCRIPTION) DESCR,nvl(document_no,doc_cheque_no) doc_no,
+daily_trans_details.TRANS_DATE,round(NVL(debit_amnt,0) ) debit_amnt ,round(NVL(credit_amnt,0) )credit_amnt ,
+NVL(daily_trans_details.rate,1),daily_trans_details.currency,acc_no,debit_credit,trans_type ,USER_ID,
+ daily_trans.RECEIPTS_VOUCH_SER ,module from daily_trans ,daily_trans_details
+  where daily_trans.voucher_no=daily_trans_details.voucher_no  
+  and daily_trans_details.trans_date=daily_trans.trans_date
+AND   complete_flag=1 and APPROVAL_FLAG='Y'
+ and    closing_flag is null  
+ ORDER BY acc_no,TRANS_DATE
+
+
 
