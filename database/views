@@ -1,0 +1,44 @@
+CREATE OR REPLACE VIEW ACC_ERROR ( ACC_NO, 
+ACC_NAME, ACC_NAME_NEW ) AS select
+a.acc_no,a.ACC_NAME_ARA,b.account_name  from trans_account a,account_codes b where a.acc_no=b.account_code
+
+--------------------------------
+CREATE OR REPLACE VIEW WAITING_VOUCHERS ( M_TYPE, 
+SUB_TYPE, DOC_NO, TRANS_DATE, BANK_NO, 
+RECEPIENT, CURR, RATE, AMOUNT, 
+DESCR, D_ACC_NO, C_ACC_NO ) AS select  'chq' , null,cheque_no ,cheque_date,cheque.BANK_NO,CHEQUE_TO,banks_acc.curr, null , amount   ,bank_name ,null, acc_no
+ from cheque , banks_acc  ,lkp_banks
+where
+banks_acc.bank_no=LKP_BANKS.BANK_NO
+AND cheque.bank_no=LKP_BANKS.bank_no
+and  cheque.bank_no=banks_acc.bank_no    and  cheque.curr=banks_acc.b_curr
+and  default1=1
+and      (voucher_flag is null or voucher_flag=0)  and  CHEQ_status=1
+ union all   select    'pr', 'local',payment.pr_no ,pr_date,null ,NULL,NVL(curr_name,'SDG') , payment.curr_rate ,payment_details.amount , to_char(to_char(descp)||'/'||'PO ='||ref_no)  , payment_details.cost_center ,null
+from    payment , currency_tab , payment_details
+where  payment_details.pr_no= payment.pr_no
+and       nvl(payment.curr,1)=currency_tab.curr_no
+and    nvl( payment.CURR,1)=1
+union all select  'pr', 'foreign',payment.pr_no ,pr_date,null ,NULL,NVL(curr_name,'SDG') , payment.curr_rate ,payment_details.amount ,to_char(to_char(descp)||'/'||'PO ='||ref_no)  ,
+payment_details.cost_center ,null
+from    payment , currency_tab , payment_details
+where  payment.pr_no=payment_details.pr_no
+and      nvl(payment.curr,1)=currency_tab.curr_no
+and     nvl( payment.CURR,1)!=1
+union  all select  'inv' ,null,invoice , inv_date,null,NULL,NVL(curr_name,'SDG')  , 1 , inv_debit.amount , descrep , acc_no,null
+from  inv_debit ,currency_table,companies_acc,inv_debit_details
+where   inv_debit.curr = currency_table.curr_no
+and  inv_debit.COMP_NO= companies_acc.comp_no      and  inv_debit.SEC_NO =companies_acc.sec_no
+AND    inv_debit.inv_no=inv_debit_DETAILS.inv_no
+and  TYPE ='d'
+and   (voucher_flag is null or voucher_flag=0)
+group by invoice,inv_date, curr_name,amount,descrep,acc_no
+union all  select  'inv' ,null ,invoice , inv_date,null,NULL,nvl(curr_name,'SDG')  , 1 , inv_debit.amount , descrep , null,acc_no
+from  inv_debit ,currency_table,companies_acc
+where   inv_debit.curr = currency_table.curr_no
+and  inv_debit.COMP_NO= companies_acc.comp_no      and  inv_debit.SEC_NO =companies_acc.sec_no
+ and  TYPE='c'
+and   (voucher_flag is null or voucher_flag=0)
+group by invoice,inv_date, curr_name,amount,descrep,acc_no
+
+---------------------------
