@@ -71,3 +71,36 @@ end;
 end if;
 end;
 END;
+.............
+
+PROCEDURE jour_PETRO  (pay_day date,us number)  IS
+BEGIN
+declare cursor sec is select distinct  sec_no from payroll_item_acc where dep_no is null  order by sec_no;
+cursor dep is select distinct  dep_no from payroll_item_acc where sec_no is null   and dep_no not in ( 4 , 6  , 7 , 13 , 14 ,10,12,21, 16 , 19 ,22 ,26) order by dep_no;
+cursor dep1 is select distinct  dep_no from payroll_item_acc where  dep_no in ( 4 , 6  , 7 , 13 , 14 ,10,12,21, 16 , 19  ,22,26) order by dep_no;
+begin
+for j in dep1 loop
+jour_dep_PETROALL(j.dep_no,pay_day,us);
+end loop;
+insert into daily_trans(VOUCHER_NO    ,        TRANS_DATE      )  SELECT DISTINCT VOUCHER_NO,TRANS_DATE   FROM   daily_trans_temp ;
+
+commit;
+insert into DAILY_TRANS_DETAILS (    ACC_NO,  TRANS_SERIAL     ,  VOUCHER_NO   ,     trans_date,   DEBIT_CREDIT     ,  CREDIT_AMNT     ,   DEBIT_AMNT       ,
+  DET_DESCRIPTION               ,   CURRENCY         ,   RATE    ,user_id,entry_date      )
+select  NVL(acc_no,0) , trans_serial,voucher_no,trans_date,debit_credit,sum(credit_amnt),sum(debit_amnt),
+ DET_DESCRIPTION  ,'SDG',1,us,sysdate  from daily_trans_temp
+group by NVL(acc_no,0) , trans_serial,voucher_no,trans_date,debit_credit,
+ DET_DESCRIPTION  ,'SDG',1,us,sysdate;
+commit;
+delete   daily_trans_temp ;
+commit;
+For i in sec loop
+jour_sec_petro(i.sec_no,pay_day,us);
+end loop;
+for y in dep loop
+ jour_dep_petro(y.dep_no,pay_day,us);
+end loop;
+
+end;
+end;
+
